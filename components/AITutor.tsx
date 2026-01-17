@@ -73,11 +73,12 @@ const AITutor: React.FC = () => {
 
     setIsAnalyzing(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // Initialize inside the function to ensure process.env is available
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
       const base64Audio = await blobToBase64(audioBlob);
       
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-pro-preview', // High quality for recitation analysis
         contents: {
           parts: [
             { inlineData: { mimeType: audioBlob.type, data: base64Audio } },
@@ -210,7 +211,6 @@ const AITutor: React.FC = () => {
                  <h3 className="font-bold text-emerald-900">Teacher's Feedback</h3>
                </div>
                <div className="p-6 prose prose-emerald prose-sm max-w-none text-slate-700">
-                  {/* Basic Markdown rendering by replacing newlines for simplicity if pure text, or just displaying text */}
                   <div className="whitespace-pre-wrap font-medium leading-relaxed">
                     {feedback}
                   </div>

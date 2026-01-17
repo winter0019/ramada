@@ -1,11 +1,10 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export const getRamadanTip = async (): Promise<{tip: string, dua: string}> => {
   try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: "Provide a helpful, concise tip for a successful fast during Ramadan, and a short Dua (supplication) in Arabic with English translation. Return as JSON.",
       config: {
         responseMimeType: "application/json",

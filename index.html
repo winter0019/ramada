@@ -6,12 +6,19 @@
     <title>Nurul Quran</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      // Polyfill process.env for browser environments where it's not injected by a bundler
+      window.process = window.process || { env: {} };
+    </script>
     <style>
       body {
         font-family: 'Inter', sans-serif;
       }
       .font-arabic {
         font-family: 'Amiri', serif;
+      }
+      .dir-rtl {
+        direction: rtl;
       }
     </style>
   <script type="importmap">
@@ -29,5 +36,7 @@
 </head>
   <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
+    <!-- Entry point for the application -->
+    <script type="module" src="index.tsx"></script>
   </body>
 </html>
