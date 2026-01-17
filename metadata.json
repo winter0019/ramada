@@ -1,0 +1,7 @@
+{
+  "name": "Nurul Quran & Ramadan Guide",
+  "description": "A comprehensive platform connecting students with expert Quran teachers and providing a complete Ramadan success package with AI-powered recitation assistance.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
