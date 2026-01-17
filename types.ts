@@ -3,7 +3,23 @@ export enum View {
   TEACHERS = 'TEACHERS',
   RAMADAN = 'RAMADAN',
   AI_TUTOR = 'AI_TUTOR',
-  TEACHER_DASHBOARD = 'TEACHER_DASHBOARD'
+  ADMIN_DASHBOARD = 'ADMIN_DASHBOARD',
+  TEACHER_DASHBOARD = 'TEACHER_DASHBOARD',
+  STUDENT_DASHBOARD = 'STUDENT_DASHBOARD',
+  LOGIN = 'LOGIN',
+  SIGNUP = 'SIGNUP'
+}
+
+export type UserRole = 'ADMIN' | 'TEACHER' | 'STUDENT';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  password?: string;
+  bio?: string;
+  youtubeLink?: string;
 }
 
 export interface Teacher {
@@ -20,6 +36,19 @@ export interface Teacher {
   videoUrl?: string;
   isVetted?: boolean;
   responseTime?: string;
+}
+
+export interface Booking {
+  id: string;
+  teacherId: string;
+  teacherName: string;
+  studentId: string;
+  studentName: string;
+  date: string;
+  time: string;
+  duration: number;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  paid: boolean;
 }
 
 export interface RamadanDay {

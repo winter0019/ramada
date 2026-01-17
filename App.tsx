@@ -1,19 +1,43 @@
 import React, { useState } from 'react';
-import { View } from './types';
+import { View, User } from './types';
 import Hero from './components/Hero';
 import TeacherList from './components/TeacherList';
 import RamadanDashboard from './components/RamadanDashboard';
 import AITutor from './components/AITutor';
-import { Moon, BookOpen, User, Menu, X, Globe, Heart, Instagram, Twitter, Facebook } from 'lucide-react';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import AdminDashboard from './components/AdminDashboard';
+import StudentDashboard from './components/StudentDashboard';
+import { Moon, BookOpen, User as UserIcon, Menu, X, Globe, Heart, Instagram, Twitter, Facebook, LayoutDashboard, LogOut } from 'lucide-react';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.HOME);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigate = (view: View) => {
     setCurrentView(view);
     setIsMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLogin = (user: User) => {
+    setCurrentUser(user);
+    if (user.role === 'ADMIN') navigate(View.ADMIN_DASHBOARD);
+    else if (user.role === 'TEACHER') navigate(View.TEACHERS); // Assuming teacher wants to see the list or their profile
+    else navigate(View.STUDENT_DASHBOARD);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    navigate(View.HOME);
+  };
+
+  const getDashboardView = () => {
+    if (!currentUser) return View.LOGIN;
+    if (currentUser.role === 'ADMIN') return View.ADMIN_DASHBOARD;
+    if (currentUser.role === 'TEACHER') return View.TEACHERS;
+    return View.STUDENT_DASHBOARD;
   };
 
   return (
@@ -33,8 +57,27 @@ const App: React.FC = () => {
               <NavButton active={currentView === View.HOME} onClick={() => navigate(View.HOME)}>Home</NavButton>
               <NavButton active={currentView === View.TEACHERS} onClick={() => navigate(View.TEACHERS)}>Find Teachers</NavButton>
               <NavButton active={currentView === View.RAMADAN} onClick={() => navigate(View.RAMADAN)}>Ramadan Guide</NavButton>
+              <NavButton active={currentView === View.AI_TUTOR} onClick={() => navigate(View.AI_TUTOR)}>AI Tutor</NavButton>
+              
               <div className="w-px h-6 bg-slate-200 mx-2"></div>
-              <NavButton active={currentView === View.AI_TUTOR} onClick={() => navigate(View.AI_TUTOR)} highlight>AI Tutor</NavButton>
+              
+              {currentUser ? (
+                <div className="flex items-center gap-2 ml-2">
+                  <NavButton active={[View.ADMIN_DASHBOARD, View.STUDENT_DASHBOARD, View.TEACHER_DASHBOARD].includes(currentView)} onClick={() => navigate(getDashboardView())} highlight>
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </NavButton>
+                  <button 
+                    onClick={handleLogout}
+                    className="p-2.5 text-slate-400 hover:text-rose-600 transition-colors"
+                    title="Logout"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </button>
+                </div>
+              ) : (
+                <NavButton active={currentView === View.LOGIN} onClick={() => navigate(View.LOGIN)} highlight>Login / Signup</NavButton>
+              )}
             </div>
 
             <div className="md:hidden">
@@ -52,7 +95,15 @@ const App: React.FC = () => {
               <MobileNavButton onClick={() => navigate(View.HOME)}>Home</MobileNavButton>
               <MobileNavButton onClick={() => navigate(View.TEACHERS)}>Find Teachers</MobileNavButton>
               <MobileNavButton onClick={() => navigate(View.RAMADAN)}>Ramadan Guide</MobileNavButton>
-              <MobileNavButton onClick={() => navigate(View.AI_TUTOR)} highlight>AI Tutor</MobileNavButton>
+              <MobileNavButton onClick={() => navigate(View.AI_TUTOR)}>AI Tutor</MobileNavButton>
+              {currentUser ? (
+                <>
+                  <MobileNavButton onClick={() => navigate(getDashboardView())} highlight>Dashboard</MobileNavButton>
+                  <MobileNavButton onClick={handleLogout}>Logout</MobileNavButton>
+                </>
+              ) : (
+                <MobileNavButton onClick={() => navigate(View.LOGIN)} highlight>Login / Signup</MobileNavButton>
+              )}
             </div>
           </div>
         )}
@@ -61,9 +112,13 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
         {currentView === View.HOME && <Hero onNavigate={navigate} />}
-        {currentView === View.TEACHERS && <TeacherList />}
+        {currentView === View.TEACHERS && <TeacherList userRole={currentUser?.role} onNavigate={navigate} />}
         {currentView === View.RAMADAN && <RamadanDashboard />}
         {currentView === View.AI_TUTOR && <AITutor />}
+        {currentView === View.LOGIN && <Login onLogin={handleLogin} onNavigate={navigate} />}
+        {currentView === View.SIGNUP && <Signup onNavigate={navigate} />}
+        {currentView === View.ADMIN_DASHBOARD && <AdminDashboard />}
+        {currentView === View.STUDENT_DASHBOARD && <StudentDashboard />}
       </main>
 
       {/* Footer */}
@@ -133,7 +188,7 @@ const App: React.FC = () => {
 const NavButton: React.FC<{ children: React.ReactNode; active?: boolean; onClick: () => void; highlight?: boolean }> = ({ children, active, onClick, highlight }) => (
   <button
     onClick={onClick}
-    className={`px-5 py-2.5 rounded-2xl text-sm font-bold transition-all ${
+    className={`px-5 py-2.5 rounded-2xl text-sm font-bold transition-all flex items-center ${
       highlight 
       ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 active:scale-95' 
       : active 
