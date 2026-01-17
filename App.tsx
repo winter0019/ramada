@@ -8,6 +8,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import AdminDashboard from './components/AdminDashboard';
 import StudentDashboard from './components/StudentDashboard';
+import Logo from './components/Logo';
 import { Moon, BookOpen, User as UserIcon, Menu, X, Globe, Heart, Instagram, Twitter, Facebook, LayoutDashboard, LogOut } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -24,7 +25,7 @@ const App: React.FC = () => {
   const handleLogin = (user: User) => {
     setCurrentUser(user);
     if (user.role === 'ADMIN') navigate(View.ADMIN_DASHBOARD);
-    else if (user.role === 'TEACHER') navigate(View.TEACHERS); // Assuming teacher wants to see the list or their profile
+    else if (user.role === 'TEACHER') navigate(View.TEACHERS); 
     else navigate(View.STUDENT_DASHBOARD);
   };
 
@@ -47,8 +48,8 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center cursor-pointer group" onClick={() => navigate(View.HOME)}>
-              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-600/20 group-hover:scale-110 transition-transform">
-                <Moon className="w-6 h-6 text-white fill-white" />
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg border border-slate-100 group-hover:scale-110 transition-transform p-1">
+                <Logo className="w-full h-full" color="#059669" />
               </div>
               <span className="ml-3 text-2xl font-black text-slate-900 tracking-tight">Nurul<span className="text-emerald-600">Quran</span></span>
             </div>
@@ -127,7 +128,9 @@ const App: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             <div className="lg:col-span-1">
               <div className="flex items-center gap-3 mb-6">
-                <Moon className="w-8 h-8 text-emerald-400 fill-emerald-400" />
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-1">
+                  <Logo className="w-full h-full" color="#059669" />
+                </div>
                 <span className="font-bold text-2xl text-white tracking-tight">Nurul Quran</span>
               </div>
               <p className="text-slate-400 leading-relaxed mb-6">Connecting the Ummah with divine wisdom through technology and tradition. Helping you master the Quran anywhere, anytime.</p>
