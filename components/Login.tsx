@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { User, View } from '../types';
+import { User, View, UserRole } from '../types';
+import { ApiService } from '../services/apiService';
+import { Loader2, AlertCircle, Mail, ArrowRight, ShieldCheck, User as UserIcon, GraduationCap, Lock } from 'lucide-react';
 
 interface LoginProps {
   onLogin: (user: User) => void;
@@ -9,75 +11,150 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onLogin, onNavigate }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple mock logic: admin@quranhub.com is admin, others based on choice
-    const role = email.includes('admin') ? 'ADMIN' : email.includes('teacher') ? 'TEACHER' : 'STUDENT';
-    const mockUser: User = {
-      id: Math.random().toString(),
-      name: email.split('@')[0],
-      email,
-      role: role as any,
+    setError(null);
+
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await ApiService.login(email, password);
+      localStorage.setItem('auth_token', response.token);
+      onLogin(response.user);
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const quickLogin = (role: UserRole) => {
+    const emailMap = {
+      ADMIN: 'admin@nurulquran.com',
+      TEACHER: 'teacher@nurulquran.com',
+      STUDENT: 'student@nurulquran.com'
     };
-    onLogin(mockUser);
+    setEmail(emailMap[role]);
+    setPassword(role === 'ADMIN' ? 'admin-password-2025' : 'password123');
   };
 
   return (
-    <div className="max-w-md mx-auto my-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-white shadow-2xl rounded-3xl p-8 border border-slate-100">
-        <h1 className="text-3xl font-black text-center text-slate-900 mb-2">Welcome Back</h1>
-        <p className="text-center text-slate-500 mb-8">Login to manage your sessions and studies.</p>
+    <div className="max-w-6xl mx-auto my-8 lg:my-16 grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden bg-white rounded-[3rem] shadow-2xl border border-slate-100 animate-in fade-in slide-in-from-bottom-8 duration-700">
+      
+      {/* Visual Side */}
+      <div className="hidden lg:flex flex-col justify-between bg-emerald-600 p-16 text-white relative overflow-hidden">
+        <div className="relative z-10">
+          <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-10 border border-white/30">
+            <ShieldCheck className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-5xl font-black leading-tight mb-6">Experience Quranic Learning <span className="text-emerald-200">the proper way.</span></h2>
+          <p className="text-emerald-50 text-xl font-medium leading-relaxed max-w-md">
+            Join thousands of students and certified teachers in a secure, structured environment built for spiritual excellence.
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Email Address</label>
-            <input 
-              type="email" 
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-              placeholder="name@example.com"
-            />
+        <div className="relative z-10 space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="flex -space-x-3">
+              {[1, 2, 3].map(i => (
+                <img key={i} src={`https://i.pravatar.cc/100?img=${i+20}`} className="w-10 h-10 rounded-full border-2 border-emerald-600 shadow-sm" alt="User" />
+              ))}
+            </div>
+            <p className="text-sm font-bold text-emerald-100">Joined by 50k+ students worldwide</p>
+          </div>
+        </div>
+
+        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 left-0 w-64 h-64 bg-emerald-400/20 rounded-full blur-3xl"></div>
+      </div>
+
+      {/* Form Side */}
+      <div className="p-10 lg:p-20 flex flex-col justify-center">
+        <div className="mb-10 text-center lg:text-left">
+          <h1 className="text-4xl font-black text-slate-900 mb-3">Welcome Back</h1>
+          <p className="text-slate-500 font-medium">Continue your journey of divine knowledge.</p>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl flex items-center gap-3 animate-in fade-in zoom-in">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <p className="text-sm font-bold">{error}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+            <div className="relative">
+              <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+                className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition-all font-bold text-slate-900"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Password</label>
-            <input 
-              type="password" 
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-              placeholder="••••••••"
-            />
+          <div className="space-y-2">
+            <div className="flex justify-between items-center ml-1">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Password</label>
+              <button type="button" className="text-xs font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-widest">Forgot?</button>
+            </div>
+            <div className="relative">
+              <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition-all font-bold text-slate-900"
+              />
+            </div>
           </div>
 
-          <button 
+          <button
             type="submit"
-            className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
+            disabled={isLoading}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white py-5 rounded-2xl font-black shadow-xl shadow-emerald-600/20 transition-all active:scale-95 flex items-center justify-center gap-3"
           >
-            Login
+            {isLoading ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : (
+              <>Sign In <ArrowRight className="w-5 h-5" /></>
+            )}
           </button>
         </form>
 
-        <p className="text-sm text-center mt-8 text-slate-600">
-          Don’t have an account?{' '}
-          <button 
-            onClick={() => onNavigate(View.SIGNUP)}
-            className="text-emerald-600 font-bold hover:underline"
-          >
-            Sign up
-          </button>
-        </p>
-        
-        <div className="mt-8 pt-6 border-t border-slate-100">
-          <p className="text-xs text-center text-slate-400 font-medium uppercase tracking-widest">Demo Credentials</p>
-          <div className="flex justify-center gap-4 mt-2">
-            <button onClick={() => {setEmail('admin@nurulquran.com'); setPassword('123');}} className="text-[10px] bg-slate-100 px-2 py-1 rounded hover:bg-slate-200">Admin</button>
-            <button onClick={() => {setEmail('teacher@nurulquran.com'); setPassword('123');}} className="text-[10px] bg-slate-100 px-2 py-1 rounded hover:bg-slate-200">Teacher</button>
-            <button onClick={() => {setEmail('student@nurulquran.com'); setPassword('123');}} className="text-[10px] bg-slate-100 px-2 py-1 rounded hover:bg-slate-200">Student</button>
+        <div className="mt-12">
+          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] text-center mb-6">Quick Test Accounts</p>
+          <div className="grid grid-cols-3 gap-4">
+            <button onClick={() => quickLogin('STUDENT')} className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-slate-100 hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
+              <UserIcon className="w-6 h-6 text-slate-400 group-hover:text-emerald-600" />
+              <span className="text-[10px] font-black uppercase text-slate-500 group-hover:text-emerald-700">Student</span>
+            </button>
+            <button onClick={() => quickLogin('TEACHER')} className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-slate-100 hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
+              <GraduationCap className="w-6 h-6 text-slate-400 group-hover:text-emerald-600" />
+              <span className="text-[10px] font-black uppercase text-slate-500 group-hover:text-emerald-700">Teacher</span>
+            </button>
+            <button onClick={() => quickLogin('ADMIN')} className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-slate-100 hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
+              <ShieldCheck className="w-6 h-6 text-slate-400 group-hover:text-emerald-600" />
+              <span className="text-[10px] font-black uppercase text-slate-500 group-hover:text-emerald-700">Admin</span>
+            </button>
           </div>
         </div>
       </div>

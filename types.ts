@@ -1,8 +1,12 @@
 export enum View {
   HOME = 'HOME',
   TEACHERS = 'TEACHERS',
+  TEACHER_MATCH = 'TEACHER_MATCH',
+  LEARNING_PATHS = 'LEARNING_PATHS',
+  METHODOLOGY = 'METHODOLOGY',
   RAMADAN = 'RAMADAN',
   AI_TUTOR = 'AI_TUTOR',
+  LIVE_CONSULTATION = 'LIVE_CONSULTATION',
   ADMIN_DASHBOARD = 'ADMIN_DASHBOARD',
   TEACHER_DASHBOARD = 'TEACHER_DASHBOARD',
   STUDENT_DASHBOARD = 'STUDENT_DASHBOARD',
@@ -20,11 +24,10 @@ export interface User {
   password?: string;
   bio?: string;
   youtubeLink?: string;
+  isOnline?: boolean;
 }
 
-export interface Teacher {
-  id: string;
-  name: string;
+export interface Teacher extends User {
   specialty: string;
   category: 'Tajweed' | 'Hifz' | 'Tafseer' | 'Beginners' | 'Arabic';
   experience: string;
@@ -35,20 +38,20 @@ export interface Teacher {
   description: string;
   videoUrl?: string;
   isVetted?: boolean;
+  ijazahInfo?: string;
+  methodology?: string;
   responseTime?: string;
+  lessonsCompleted?: number;
 }
 
-export interface Booking {
+export interface Session {
   id: string;
   teacherId: string;
-  teacherName: string;
   studentId: string;
-  studentName: string;
-  date: string;
-  time: string;
+  startTime: string;
   duration: number;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-  paid: boolean;
+  status: 'paid' | 'ongoing' | 'completed' | 'cancelled';
+  price?: string;
 }
 
 export interface RamadanDay {

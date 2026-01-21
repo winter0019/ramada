@@ -1,8 +1,10 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 
 export const getRamadanTip = async (): Promise<{tip: string, dua: string}> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    // Initializing Gemini client as per the latest @google/genai guidelines
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: "Provide a helpful, concise tip for a successful fast during Ramadan, and a short Dua (supplication) in Arabic with English translation. Return as JSON.",
@@ -19,6 +21,7 @@ export const getRamadanTip = async (): Promise<{tip: string, dua: string}> => {
       }
     });
     
+    // response.text is a property, not a method
     if (response.text) {
         return JSON.parse(response.text);
     }

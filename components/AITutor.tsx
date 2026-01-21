@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { Mic, Square, Loader, Play, RotateCcw, Send, BookOpen } from 'lucide-react';
@@ -73,8 +74,8 @@ const AITutor: React.FC = () => {
 
     setIsAnalyzing(true);
     try {
-      // Initialize inside the function to ensure process.env is available
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+      // Re-initialize Gemini client inside function to ensure environment context is fresh
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const base64Audio = await blobToBase64(audioBlob);
       
       const response = await ai.models.generateContent({
@@ -96,6 +97,7 @@ const AITutor: React.FC = () => {
         }
       });
 
+      // Using .text property instead of .text() method
       setFeedback(response.text || "No feedback received.");
     } catch (error) {
       console.error("Analysis error:", error);
