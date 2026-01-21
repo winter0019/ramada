@@ -7,6 +7,18 @@ const ADMIN_CREDENTIALS = {
   password: 'admin-password-2025'
 };
 
+// Simulation of a persistence layer
+const getMockDB = () => {
+  const db = localStorage.getItem('nurul_quran_mock_users');
+  return db ? JSON.parse(db) : {};
+};
+
+const saveToMockDB = (email: string, userData: any) => {
+  const db = getMockDB();
+  db[email.toLowerCase()] = userData;
+  localStorage.setItem('nurul_quran_mock_users', JSON.stringify(db));
+};
+
 export class ApiService {
   /**
    * Simulates a POST /api/login endpoint
@@ -14,8 +26,10 @@ export class ApiService {
   static async login(email: string, password: string): Promise<{ user: User; token: string }> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
+        const lowerEmail = email.toLowerCase();
+        
         // Hardcoded protection for Admin endpoint logic
-        if (email === ADMIN_CREDENTIALS.email) {
+        if (lowerEmail === ADMIN_CREDENTIALS.email) {
           if (password === ADMIN_CREDENTIALS.password) {
             resolve({
               user: {
@@ -33,19 +47,81 @@ export class ApiService {
           return;
         }
 
-        // Generic mock for other roles
-        const role: UserRole = email.includes('teacher') ? 'TEACHER' : 'STUDENT';
+        // Check mock database for signed up users
+        const db = getMockDB();
+        const existingUser = db[lowerEmail];
+        
+        if (existingUser) {
+          if (existingUser.password === password) {
+            resolve({
+              user: {
+                id: existingUser.id,
+                name: existingUser.name,
+                email: existingUser.email,
+                role: existingUser.role,
+                isOnline: true
+              },
+              token: `simulated-jwt-${existingUser.role.toLowerCase()}-token`
+            });
+            return;
+          } else {
+            reject(new Error('Incorrect password. Please try again.'));
+            return;
+          }
+        }
+
+        // Generic mock for hardcoded test roles if not in DB
+        if (lowerEmail.includes('teacher') || lowerEmail.includes('student')) {
+          const role: UserRole = lowerEmail.includes('teacher') ? 'TEACHER' : 'STUDENT';
+          resolve({
+            user: {
+              id: Math.random().toString(36).substr(2, 9),
+              name: email.split('@')[0],
+              email: email,
+              role: role,
+              isOnline: true
+            },
+            token: `simulated-jwt-${role.toLowerCase()}-token`
+          });
+          return;
+        }
+
+        reject(new Error('User not found. Please sign up first.'));
+      }, 1000);
+    });
+  }
+
+  /**
+   * Simulates a POST /api/signup endpoint
+   */
+  static async signup(userData: any): Promise<{ user: User; token: string }> {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const db = getMockDB();
+        if (db[userData.email.toLowerCase()]) {
+          reject(new Error('Email already registered.'));
+          return;
+        }
+
+        const newUser = {
+          ...userData,
+          id: Math.random().toString(36).substr(2, 9),
+          role: userData.role || 'STUDENT'
+        };
+
+        saveToMockDB(userData.email, newUser);
+
         resolve({
           user: {
-            id: Math.random().toString(36).substr(2, 9),
-            name: email.split('@')[0],
-            email: email,
-            role: role,
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email,
+            role: newUser.role,
             isOnline: true
           },
-          token: `simulated-jwt-${role.toLowerCase()}-token`
+          token: `simulated-jwt-${newUser.role.toLowerCase()}-token`
         });
-      }, 1000);
+      }, 1500);
     });
   }
 

@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { ArrowRight, Star, ShieldCheck, Users, BookOpen, Globe, Sparkles, Map } from 'lucide-react';
+import { ArrowRight, Star, ShieldCheck, Users, BookOpen, Globe, Sparkles, Map, UserPlus } from 'lucide-react';
 import { View } from '../types';
 
 interface HeroProps {
@@ -14,7 +15,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         <div className="lg:grid lg:grid-cols-12 lg:gap-16 items-center">
           <div className="sm:text-center md:mx-auto md:max-w-2xl lg:col-span-6 lg:text-left">
             <div className="inline-flex items-center gap-3 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-black text-emerald-700 border border-emerald-100 mb-8 animate-fade-in">
-              <SparkleIcon />
+              <Sparkles className="w-4 h-4" />
               World's #1 Quran Learning Platform
             </div>
             <h1 className="text-5xl font-black tracking-tight text-slate-900 sm:text-7xl leading-[1.1]">
@@ -26,16 +27,16 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             
             <div className="mt-12 flex flex-col sm:flex-row items-center gap-4 lg:justify-start">
               <button
-                onClick={() => onNavigate(View.LEARNING_PATHS)}
+                onClick={() => onNavigate(View.SIGNUP)}
                 className="w-full sm:w-auto rounded-2xl bg-emerald-600 px-10 py-5 text-lg font-black text-white shadow-2xl shadow-emerald-600/30 hover:bg-emerald-500 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 group"
               >
-                View My Path <Map className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                Join the Community <UserPlus className="w-5 h-5 group-hover:rotate-12 transition-transform" />
               </button>
               <button
-                onClick={() => onNavigate(View.TEACHER_MATCH)}
+                onClick={() => onNavigate(View.TEACHERS)}
                 className="w-full sm:w-auto px-10 py-5 text-lg font-black text-slate-900 flex items-center justify-center gap-3 hover:text-emerald-600 transition-colors group"
               >
-                Find a Proper Teacher
+                Explore Vetted Tutors
               </button>
             </div>
 
@@ -118,11 +119,5 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     </div>
   );
 };
-
-const SparkleIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-emerald-600">
-    <path d="M12 3L14.5 9L21 11L14.5 13L12 19L9.5 13L3 11L9.5 9L12 3Z" fill="currentColor" />
-  </svg>
-);
 
 export default Hero;
