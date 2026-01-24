@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Teacher, View, UserRole } from '../types';
 import { 
   Star, Clock, Award, Video, X, Check, ArrowLeft, 
@@ -104,6 +105,35 @@ const TeacherList: React.FC<TeacherListProps> = ({ userRole, onNavigate }) => {
   const [activeCategory, setActiveCategory] = useState<Teacher['category'] | 'All'>('All');
   const [activeTab, setActiveTab] = useState<'About' | 'Methodology' | 'Reviews'>('About');
   
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (!viewingProfile || activeTab !== 'About' || !videoRef.current) return;
+
+    const videoElement = videoRef.current;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          videoElement.play().catch(err => {
+            // Silently fail if autoplay is blocked by browser policy
+            console.debug("Autoplay blocked:", err);
+          });
+        } else {
+          videoElement.pause();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(videoElement);
+
+    return () => {
+      if (videoElement) {
+        observer.unobserve(videoElement);
+      }
+    };
+  }, [viewingProfile, activeTab]);
+
   const filteredTeachers = useMemo(() => {
     return teachers.filter(t => {
       const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -256,7 +286,14 @@ const TeacherList: React.FC<TeacherListProps> = ({ userRole, onNavigate }) => {
                     <section className="mt-12">
                       <h3 className="text-2xl font-black text-slate-900 mb-4">Video Introduction</h3>
                       <div className="aspect-video bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl relative group">
-                        <video controls className="w-full h-full object-cover">
+                        <video 
+                          ref={videoRef}
+                          controls 
+                          muted 
+                          playsInline 
+                          loop
+                          className="w-full h-full object-cover"
+                        >
                           <source src={viewingProfile.videoUrl} type="video/mp4" />
                         </video>
                       </div>
